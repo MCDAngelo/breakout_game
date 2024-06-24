@@ -4,8 +4,10 @@ import turtle as t
 from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    TURTLE_HEIGHT,
 )
 
+from ball import Ball
 from brick import BrickManager
 from paddle import Paddle
 
@@ -17,6 +19,7 @@ screen.title("My Breakout Game")
 screen.tracer(n=0)
 paddle = Paddle((0, -SCREEN_HEIGHT + 20))
 brick_manager = BrickManager()
+ball = Ball()
 screen.update()
 
 screen.listen()
@@ -28,5 +31,26 @@ game_is_on = True
 while game_is_on:
     time.sleep(0.1)
     screen.update()
+    # Check if ball has to bounce off of walls or paddle
+    if ball.ycor() + ball.y_adj > (SCREEN_HEIGHT - TURTLE_HEIGHT):
+        ball.bounce_y()
+    if abs(ball.xcor() + ball.x_adj) > (SCREEN_WIDTH - TURTLE_HEIGHT):
+        ball.bounce_x()
+    if paddle.hit_ball(ball):
+        ball.bounce_y()
+    # Check if player missed ball with paddle, lose a life
+    if ball.ycor() < -SCREEN_HEIGHT:
+        # lose a life
+        ball.reset()
+    # Check if hit a brick:
+    for b in brick_manager.bricks:
+        if b.distance(ball) <= 20:
+            # update score & remove brick
+            pass
+    if len(brick_manager.bricks) == 0:
+        # reset the bricks
+        # brick_manager.reset_bricks()
+        pass
+    ball.move()
 
 screen.exitonclick()
