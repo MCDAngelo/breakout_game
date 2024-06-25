@@ -1,14 +1,9 @@
 import time
 import turtle as t
 
-from constants import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    TURTLE_HEIGHT,
-)
-
 from ball import Ball
 from brick import BrickManager
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TURTLE_HEIGHT
 from paddle import Paddle
 from scoreboard import Scoreboard
 
@@ -32,17 +27,17 @@ game_is_on = True
 while game_is_on:
     time.sleep(0.1)
     screen.update()
-    # Check if ball has to bounce off of walls or paddle
-    if ball.ycor() + ball.y_adj > (SCREEN_HEIGHT - TURTLE_HEIGHT):
+    # Check if ball will bounce off of walls or paddle
+    if (ball.ycor() + ball.y_adj) >= (SCREEN_HEIGHT - (TURTLE_HEIGHT / 2)):
         ball.bounce_y()
-    if abs(ball.xcor() + ball.x_adj) > (SCREEN_WIDTH - TURTLE_HEIGHT):
+    if abs(ball.xcor() + ball.x_adj) >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2)):
         ball.bounce_x()
     if paddle.hit_ball(ball):
         ball.bounce_y()
     # Check if player missed ball with paddle, lose a life
-    if ball.ycor() < -SCREEN_HEIGHT:
+    if ball.ycor() <= -SCREEN_HEIGHT + ball.y_adj:
         # lose a life
-        ball.reset()
+        ball.recenter()
     # Check if hit a brick:
     for b in brick_manager.bricks:
         if b.check_hit(ball):
