@@ -1,4 +1,5 @@
 from turtle import Turtle
+from random import choice
 
 
 class Ball(Turtle):
@@ -7,8 +8,8 @@ class Ball(Turtle):
         self.shape("circle")
         self.color("white")
         self.penup()
-        self.x_adj = 10
-        self.y_adj = -10
+        self.x_adj = choice([-20, 20])
+        self.y_adj = -20
         self.move_speed = 0.1
 
     def move(self):
@@ -24,6 +25,6 @@ class Ball(Turtle):
 
     def recenter(self):
         if self.y_adj > 0:
-            self.y_adj += -1
+            self.y_adj *= -1
         self.goto(0, 0)
         self.bounce_x()
