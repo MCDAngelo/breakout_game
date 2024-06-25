@@ -44,13 +44,13 @@ while game_is_on:
         ball.reset()
     # Check if hit a brick:
     for b in brick_manager.bricks:
-        if b.distance(ball) <= 20:
+        if b.check_hit(ball):
             # update score & remove brick
-            pass
+            brick_manager.remove_brick(b)
+            # ball.bounce_x()
+            ball.bounce_y()
     if len(brick_manager.bricks) == 0:
-        # reset the bricks
-        # brick_manager.reset_bricks()
-        pass
+        brick_manager.reset_bricks()
     ball.move()
 
 screen.exitonclick()

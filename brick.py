@@ -25,6 +25,21 @@ class Brick(t.Turtle):
     def get_points(self, color):
         self.points = BRICK_SCORING.get(color)
 
+    def check_hit(self, ball):
+        if self.distance(ball) <= 2 * TURTLE_HEIGHT:
+            return True
+        # Check for hits made to corners of the brick, as .distance method
+        # compares from center of turtle
+        # Note that the ball roughly has diameter of TURTLE_HEIGHT
+        max_x_dist_for_hit = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2) + abs(ball.x_adj)
+        max_y_dist_for_hit = TURTLE_HEIGHT / 2 + ball.y_adj
+        if (abs(self.xcor() - ball.xcor()) <= max_x_dist_for_hit) & (
+            abs(self.ycor() - ball.ycor()) <= max_y_dist_for_hit
+        ):
+            return True
+        else:
+            return False
+
 
 class BrickManager:
     def __init__(self):
@@ -43,3 +58,13 @@ class BrickManager:
             for c, y in zip(self.brick_colors, self.brick_y_coords)
             for x in self.brick_x_coords
         ]
+        self.used_bricks = []
+
+    def reset_bricks(self):
+        self.bricks = [b.reset() for b in self.used_bricks]
+        self.used_bricks = []
+
+    def remove_brick(self, b):
+        self.used_bricks.append(b)
+        self.bricks.remove(b)
+        b.hideturtle()
