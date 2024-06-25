@@ -10,7 +10,7 @@ from constants import (
 from ball import Ball
 from brick import BrickManager
 from paddle import Paddle
-
+from scoreboard import Scoreboard
 
 screen = t.Screen()
 screen.setup(width=SCREEN_WIDTH * 2, height=SCREEN_HEIGHT * 2)
@@ -18,6 +18,7 @@ screen.bgcolor("black")
 screen.title("My Breakout Game")
 screen.tracer(n=0)
 paddle = Paddle((0, -SCREEN_HEIGHT + 20))
+scoreboard = Scoreboard()
 brick_manager = BrickManager()
 ball = Ball()
 screen.update()
@@ -45,7 +46,7 @@ while game_is_on:
     # Check if hit a brick:
     for b in brick_manager.bricks:
         if b.check_hit(ball):
-            # update score & remove brick
+            scoreboard.update_score(b.points)
             brick_manager.remove_brick(b)
             # ball.bounce_x()
             ball.bounce_y()
