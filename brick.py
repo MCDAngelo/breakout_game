@@ -29,7 +29,7 @@ class Brick(t.Turtle):
 class BrickManager:
     def __init__(self):
         self.brick_y_coords = [
-            (SCREEN_HEIGHT - (i * (TURTLE_HEIGHT + 15)) - 90)
+            (SCREEN_HEIGHT - (i * (TURTLE_HEIGHT + 5)) - 110)
             for i in range(0, NUM_BRICK_ROWS)
         ]
         self.brick_x_coords = [
