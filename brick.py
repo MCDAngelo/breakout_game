@@ -6,8 +6,8 @@ from constants import (
     NUM_BRICK_ROWS,
     SCREEN_HEIGHT,
     TURTLE_HEIGHT,
-    TURTLE_WIDTH_FACTOR,
-    TURTLE_WIDTH,
+    BRICK_WIDTH,
+    BRICK_WIDTH_FACTOR,
 )
 
 
@@ -20,7 +20,7 @@ class Brick(t.Turtle):
         self.penup()
         self.setheading(180)
         self.goto(starting_pos)
-        self.shapesize(stretch_wid=1, stretch_len=TURTLE_WIDTH_FACTOR)
+        self.shapesize(stretch_wid=1, stretch_len=BRICK_WIDTH_FACTOR)
 
     def get_points(self, color):
         self.points = BRICK_SCORING.get(color)
@@ -33,7 +33,7 @@ class BrickManager:
             for i in range(0, NUM_BRICK_ROWS)
         ]
         self.brick_x_coords = [
-            (i * (TURTLE_WIDTH + 30) + 25)
+            (i * (BRICK_WIDTH + 5) + 25)
             for i in range(-NUM_BRICK_COLS // 2, NUM_BRICK_COLS // 2)
         ]
         self.brick_colors = [i for i in BRICK_SCORING.keys() for _ in range(0, 2)]
