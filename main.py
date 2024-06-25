@@ -28,9 +28,9 @@ while game_is_on:
     time.sleep(0.1)
     screen.update()
     # Check if ball will bounce off of walls or paddle
-    if (ball.ycor() + ball.y_adj) >= (SCREEN_HEIGHT - (TURTLE_HEIGHT / 2)):
+    if ball.ycor() >= (SCREEN_HEIGHT - (TURTLE_HEIGHT / 2)):
         ball.bounce_y()
-    if abs(ball.xcor() + ball.x_adj) >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2)):
+    if abs(ball.xcor()) >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2)):
         ball.bounce_x()
     if paddle.hit_ball(ball):
         ball.bounce_y()
@@ -43,7 +43,6 @@ while game_is_on:
         if b.check_hit(ball):
             scoreboard.update_score(b.points)
             brick_manager.remove_brick(b)
-            # ball.bounce_x()
             ball.bounce_y()
     if len(brick_manager.bricks) == 0:
         brick_manager.reset_bricks()

@@ -8,8 +8,8 @@ class Ball(Turtle):
         self.shape("circle")
         self.color("white")
         self.penup()
-        self.x_adj = choice([-20, 20])
-        self.y_adj = -20
+        self.x_adj = choice([-10, 10])
+        self.y_adj = -10
         self.move_speed = 0.1
 
     def move(self):

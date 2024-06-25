@@ -20,11 +20,11 @@ class Paddle(t.Turtle):
         self.shapesize(stretch_wid=1, stretch_len=PADDLE_WIDTH_FACTOR)
 
     def move_left(self):
-        if self.distance(x=-SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH:
+        if self.distance(x=-SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH / 2:
             self.forward(STEP)
 
     def move_right(self):
-        if self.distance(x=SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH:
+        if self.distance(x=SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH / 2:
             self.back(STEP)
 
     def move_paddle(self):
@@ -32,14 +32,13 @@ class Paddle(t.Turtle):
         t.onkeypress(key="Right", fun=self.move_right)
 
     def hit_ball(self, ball):
-        max_y_dist_for_hit = TURTLE_HEIGHT + ball.y_adj
-        if (self.distance(ball) <= max_y_dist_for_hit) & (ball.y_adj < 0):
-            return True
-        # Custom check for hits made by corner of paddle
-        max_x_dist_for_hit = (PADDLE_WIDTH / 2) + (TURTLE_HEIGHT / 2) + abs(ball.x_adj)
-        if ((self.ycor() - ball.ycor()) <= max_y_dist_for_hit) & (
-            abs(self.xcor() - ball.xcor()) <= max_x_dist_for_hit
-        ):
-            return True
-        else:
-            return False
+        max_y_dist_for_hit = TURTLE_HEIGHT + (abs(ball.y_adj) / 2)
+        max_x_dist_for_hit = (PADDLE_WIDTH / 2) + (TURTLE_HEIGHT / 2)
+        if ball.y_adj < 0:
+            if self.distance(ball) <= max_y_dist_for_hit:
+                return True
+            # Custom check for hits made by corner of paddle
+            if ((ball.ycor() - self.ycor()) < max_y_dist_for_hit) & (
+                abs(self.xcor() - ball.xcor()) < max_x_dist_for_hit
+            ):
+                return True

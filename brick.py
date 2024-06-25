@@ -26,19 +26,17 @@ class Brick(t.Turtle):
         self.points = BRICK_SCORING.get(color)
 
     def check_hit(self, ball):
-        if self.distance(ball) <= 2 * TURTLE_HEIGHT:
+        max_y_dist_for_hit = TURTLE_HEIGHT + (abs(ball.y_adj) / 2)
+        max_x_dist_for_hit = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2)
+        if self.distance(ball) <= max_y_dist_for_hit:
             return True
         # Check for hits made to corners of the brick, as .distance method
         # compares from center of turtle
         # Note that the ball roughly has diameter of TURTLE_HEIGHT
-        max_x_dist_for_hit = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2) + abs(ball.x_adj)
-        max_y_dist_for_hit = TURTLE_HEIGHT / 2 + ball.y_adj
         if (abs(self.xcor() - ball.xcor()) <= max_x_dist_for_hit) & (
             abs(self.ycor() - ball.ycor()) <= max_y_dist_for_hit
         ):
             return True
-        else:
-            return False
 
 
 class BrickManager:
