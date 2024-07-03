@@ -1,9 +1,19 @@
-from turtle import Turtle
-from random import choice
+import logging
 import math
+from random import choice, randint
+from turtle import Turtle
+
 import numpy as np
 
-from constants import PADDLE_WIDTH
+from constants import BRICK_WIDTH, PADDLE_WIDTH, TURTLE_HEIGHT
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("breakout_logger.log")
+formatter = logging.Formatter("[%(asctime)s] - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 
 class Ball(Turtle):
@@ -13,32 +23,29 @@ class Ball(Turtle):
         self.color("white")
         self.penup()
         self.goto(0, 0)
-        self.x_adj = choice([-10, 10])
-        self.y_adj = -10
+        self.x_adj = choice([-13, 13])
+        self.y_adj = -13
         self.move_speed = round(math.sqrt((self.x_adj) ** 2 + (self.y_adj) ** 2), 2)
 
     def move(self):
-        print(f"BALL MOVING FROM ({self.xcor()}, {self.ycor()})")
         new_x = self.xcor() + self.x_adj
         new_y = self.ycor() + self.y_adj
         self.goto(new_x, new_y)
-        print(f"BALL MOVING TO ({self.xcor()}, {self.ycor()})")
 
     def update_adj_coords_theta_approach(self, theta):
         x = math.cos(theta)
         y = math.sin(theta)
-        theta_d = theta * 180 / math.pi
-        print(
-            f"For angle {theta:.2f} RAD ({theta_d:.2f}deg), new direction = ({x:.2f}, {y:.2f})"
-        )
         self.x_adj = round(x * self.move_speed, 2)
         self.y_adj = round(y * self.move_speed, 2)
-        print(f" NEW x_adj = {self.x_adj:.2f}, y_adj = {self.y_adj:.2f}")
 
     def reflect_v(self, normal_v):
+        if abs(self.y_adj) < 5:
+            rand_adj = randint(70, 100) / 100
+            self.y_adj = (
+                self.y_adj + rand_adj if self.y_adj > 0 else self.y_adj - rand_adj
+            )
         current_v = np.array([self.x_adj, self.y_adj])
         normal_v = np.array(normal_v)
-        print(current_v @ normal_v)
         reflected_v = current_v - 2 * (current_v @ normal_v) * normal_v
         self.x_adj = reflected_v[0]
         self.y_adj = reflected_v[1]
@@ -63,7 +70,60 @@ class Ball(Turtle):
         # print(f"Hit {d} distance from edge of paddle")
         # self.update_adj_coords_theta_approach(theta)
 
-        # ADD RANDOM VARIATION WHEN BALL BOUNCES BACK AND FORTH HORIZONTALLY
+    def bounce_brick(self, brick):
+        logger.debug(f"ball:({self.pos()}), brick: ({brick.pos()})")
+        BUFFER = 5
+        yspan_for_brick = TURTLE_HEIGHT + BUFFER
+        xspan_for_brick = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2) + BUFFER
+        if (
+            (brick.ycor() >= self.ycor() >= (brick.ycor() - yspan_for_brick))
+            & (
+                (brick.xcor() - xspan_for_brick)
+                <= self.xcor()
+                <= (brick.xcor() + xspan_for_brick)
+            )
+            & (self.y_adj > 0)
+        ):
+            print("hello")
+            logger.info("=== BOUNCED OFF OF BOTTOM ===")
+            self.bounce_horizontal_wall()
+            return True
+        elif (
+            (brick.ycor() <= self.ycor() <= (brick.ycor() - yspan_for_brick))
+            & (
+                (brick.xcor() - xspan_for_brick)
+                <= self.xcor()
+                <= (brick.xcor() + xspan_for_brick)
+            )
+            & (self.y_adj < 0)
+        ):
+            logger.info("=== BOUNCED OFF OF TOP ===")
+            self.bounce_horizontal_wall()
+            return True
+        elif (
+            (brick.xcor() >= self.xcor() >= (brick.xcor() - xspan_for_brick))
+            & (
+                (brick.ycor() - yspan_for_brick)
+                <= self.ycor()
+                <= (brick.ycor() + yspan_for_brick)
+            )
+            & (self.x_adj < 0)
+        ):
+            logger.info("=== BOUNCED OFF OF LEFT ===")
+            self.bounce_vertical_wall()
+            return True
+        elif (
+            (brick.xcor() <= self.xcor() <= (brick.xcor() + xspan_for_brick))
+            & (
+                (brick.ycor() - yspan_for_brick)
+                <= self.ycor()
+                <= (brick.ycor() + yspan_for_brick)
+            )
+            & (self.x_adj > 0)
+        ):
+            logger.info("=== BOUNCED OFF OF RIGHT ===")
+            self.bounce_vertical_wall()
+            return True
 
     def bounce_vertical_wall(self):
         self.reflect_v([1, 0])
@@ -78,11 +138,7 @@ class Ball(Turtle):
         self.x_adj *= -1
 
     def speed_up(self):
-        print(f"Original speed = {self.move_speed:.2f}")
-        print(f"Original deltas: x= {self.x_adj}, y={self.y_adj}")
         old_speed = self.move_speed
         self.move_speed *= 1.2
         self.x_adj *= self.move_speed / old_speed
         self.y_adj *= self.move_speed / old_speed
-        print(f"Updated speed = {self.move_speed:.2f}")
-        print(f"New deltas: x= {self.x_adj}, y={self.y_adj}")

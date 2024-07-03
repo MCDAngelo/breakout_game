@@ -1,3 +1,4 @@
+import logging
 import time
 import turtle as t
 
@@ -6,6 +7,16 @@ from brick import BrickManager
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TURTLE_HEIGHT
 from paddle import Paddle
 from scoreboard import Scoreboard
+
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("breakout_logger.log")
+formatter = logging.Formatter("[%(asctime)s] - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
+
 
 screen = t.Screen()
 screen.setup(width=SCREEN_WIDTH * 2, height=SCREEN_HEIGHT * 2)
@@ -30,37 +41,49 @@ while game_is_on:
 
     # Check if level has been completed
     if (len(brick_manager.bricks) == 0) and (scoreboard.display.level < 2):
+        logger.info("Completed level 1")
         brick_manager.reset_bricks()
 
     else:
+        logger.debug(
+            f"ball position ({ball.xcor()}, {ball.ycor()}) - adj: ({ball.x_adj}, {ball.y_adj})"
+        )
         # Check if player missed ball with paddle, lose a life
         if ball.ycor() <= -SCREEN_HEIGHT + ball.y_adj:
-            # lose a life
             game_is_on = scoreboard.lose_life()
+            logger.info("---LOST A LIFE---")
             ball.recenter()
 
         # Check if ball will bounce off of paddle or walls
         elif paddle.hit_ball(ball):
-            print(
-                f"BALL ({ball.xcor()}, {ball.ycor()}) - PADDLE ({paddle.xcor()}, {paddle.ycor()})"
-            )
-            print("__ HIT PADDLE ___")
+            logger.info("=== HIT PADDLE ===")
             ball.bounce_paddle(paddle)
         elif ball.ycor() >= (SCREEN_HEIGHT - (TURTLE_HEIGHT / 2)):
+            logger.info("=== HIT TOP WALL === ")
             ball.bounce_horizontal_wall()
-        elif abs(ball.xcor()) >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2)):
+        elif (ball.xcor() <= (-SCREEN_WIDTH + (TURTLE_HEIGHT / 2))) & (ball.x_adj < 0):
+            logger.info("=== HIT LEFT SIDE WALL ===")
+            ball.bounce_vertical_wall()
+        elif (ball.xcor() >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2))) & (ball.x_adj > 1):
+            logger.info("=== HIT RIGHT SIDE WALL ===")
             ball.bounce_vertical_wall()
 
-        # Check if hit a brick
-        for b in brick_manager.bricks:
-            if b.check_hit(ball):
-                first_hit = scoreboard.update_score(b.points)
-                brick_manager.remove_brick(b)
-                # Update with method for bouncing off of brick depending on side hit
-                ball.bounce_horizontal_wall()
-                # ball.bounce_paddle(b)
-                if (scoreboard.num_hits in [2, 3, 4, 12]) or first_hit:
-                    ball.speed_up()
+        # Check if hit a brick, order bricks by distance to ball
+        brick_dists = {b: ball.distance(b) for b in brick_manager.bricks}
+        ordered_bricks = sorted(brick_dists.items(), key=lambda x: x[1])
+        for b, d in ordered_bricks:
+            if d <= 37:
+                logger.info(f"CHECKING BRICK {b.id} [{b.color()[0]}] - DIST = {d}")
+                if ball.bounce_brick(b):
+                    logger.info(f"=== HIT BRICK {b.id} [{b.color()[0]}] ===")
+                    first_hit = scoreboard.update_score(b.points)
+                    # Update with method for bouncing off of brick depending on side hit
+                    brick_manager.remove_brick(b)
+                    if (scoreboard.num_hits in [4, 12]) or first_hit:
+                        ball.speed_up()
+                    brick_dists = {}
+                    ordered_bricks = []
+                    break
 
     ball.move()
 

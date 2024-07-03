@@ -1,3 +1,4 @@
+import logging
 from turtle import Turtle
 
 from constants import (
@@ -7,6 +8,14 @@ from constants import (
     SCORE_DISPLAY_FONT,
     SCREEN_HEIGHT,
 )
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("breakout_logger.log")
+formatter = logging.Formatter("[%(asctime)s] - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 
 class ScoreDisplay(Turtle):
@@ -22,9 +31,9 @@ class ScoreDisplay(Turtle):
         self.write_score()
 
     def write_score(self):
-        self.goto(self.position)
         scoreboard_format = f"{self.score}"
         lives_format = f"{"♥︎ "*self.lives + "  "*(3-self.lives)}"
+        self.goto(self.position)
         self.write(scoreboard_format, align=DISPLAY_ALIGNMENT, font=SCORE_DISPLAY_FONT)
         self.forward(200)
         self.write(lives_format, align=DISPLAY_ALIGNMENT, font=DISPLAY_FONT)
@@ -48,11 +57,11 @@ class Scoreboard:
 
     def check_first_hits(self, points):
         if (not self.has_hit_orange) and (points == 5):
-            print("hit first orange")
+            logger.info("hit first orange")
             self.has_hit_orange = True
             return True
         if (not self.has_hit_red) and (points == 7):
-            print("hit first red")
+            logger.info("hit first red")
             self.has_hit_red = True
             return True
 

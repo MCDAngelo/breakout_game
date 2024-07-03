@@ -1,18 +1,27 @@
+import logging
 import turtle as t
 
 from constants import (
     BRICK_SCORING,
+    BRICK_WIDTH,
+    BRICK_WIDTH_FACTOR,
     NUM_BRICK_COLS,
     NUM_BRICK_ROWS,
     SCREEN_HEIGHT,
     TURTLE_HEIGHT,
-    BRICK_WIDTH,
-    BRICK_WIDTH_FACTOR,
 )
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("breakout_logger.log")
+formatter = logging.Formatter("[%(asctime)s] - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 
 class Brick(t.Turtle):
-    def __init__(self, color, starting_pos):
+    def __init__(self, color, starting_pos, id):
         super().__init__()
         self.color(color)
         self.shape("square")
@@ -21,22 +30,10 @@ class Brick(t.Turtle):
         self.setheading(180)
         self.goto(starting_pos)
         self.shapesize(stretch_wid=1, stretch_len=BRICK_WIDTH_FACTOR)
+        self.id = id
 
     def get_points(self, color):
         self.points = BRICK_SCORING.get(color)
-
-    def check_hit(self, ball):
-        max_y_dist_for_hit = TURTLE_HEIGHT + (abs(ball.y_adj) / 2)
-        max_x_dist_for_hit = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2)
-        if self.distance(ball) <= max_y_dist_for_hit:
-            return True
-        # Check for hits made to corners of the brick, as .distance method
-        # compares from center of turtle
-        # Note that the ball roughly has diameter of TURTLE_HEIGHT
-        if (abs(self.xcor() - ball.xcor()) <= max_x_dist_for_hit) & (
-            abs(self.ycor() - ball.ycor()) <= max_y_dist_for_hit
-        ):
-            return True
 
 
 class BrickManager:
@@ -45,15 +42,17 @@ class BrickManager:
             (SCREEN_HEIGHT - (i * (TURTLE_HEIGHT + 5)) - 110)
             for i in range(0, NUM_BRICK_ROWS)
         ]
+        logger.info(f"ROWS OF BRICK Y COORDS: \n{self.brick_y_coords}")
         self.brick_x_coords = [
-            (i * (BRICK_WIDTH + 5) + 25)
+            (i * (BRICK_WIDTH + 6) + 23)
             for i in range(-NUM_BRICK_COLS // 2, NUM_BRICK_COLS // 2)
         ]
+        logger.info(f"ROWS OF BRICK X COORDS: \n{self.brick_x_coords}")
         self.brick_colors = [i for i in BRICK_SCORING.keys() for _ in range(0, 2)]
 
         self.bricks = [
-            Brick(c, (x, y))
-            for c, y in zip(self.brick_colors, self.brick_y_coords)
+            Brick(color=c, starting_pos=(x, y), id=(x, y))
+            for c, y in zip(reversed(self.brick_colors), reversed(self.brick_y_coords))
             for x in self.brick_x_coords
         ]
         self.used_bricks = []

@@ -20,11 +20,11 @@ class Paddle(t.Turtle):
         self.shapesize(stretch_wid=1, stretch_len=PADDLE_WIDTH_FACTOR)
 
     def move_left(self):
-        if self.distance(x=-SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH / 2:
+        if self.distance(x=-SCREEN_WIDTH, y=self.ycor()) > (PADDLE_WIDTH / 2):
             self.forward(STEP)
 
     def move_right(self):
-        if self.distance(x=SCREEN_WIDTH, y=self.ycor()) > PADDLE_WIDTH / 2:
+        if self.distance(x=SCREEN_WIDTH, y=self.ycor()) > (PADDLE_WIDTH / 2):
             self.back(STEP)
 
     def move_paddle(self):
