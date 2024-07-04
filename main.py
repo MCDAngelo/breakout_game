@@ -23,6 +23,7 @@ screen.setup(width=SCREEN_WIDTH * 2, height=SCREEN_HEIGHT * 2)
 screen.bgcolor("black")
 screen.title("My Breakout Game")
 screen.tracer(n=0)
+logger.info("===Starting New Game===")
 paddle = Paddle((0, -SCREEN_HEIGHT + 20))
 scoreboard = Scoreboard()
 brick_manager = BrickManager()
@@ -36,7 +37,7 @@ screen.onkeypress(key="Right", fun=paddle.move_right)
 game_is_on = True
 
 while game_is_on:
-    time.sleep(0.1)
+    time.sleep(0.01)
     screen.update()
 
     # Check if level has been completed
@@ -51,21 +52,21 @@ while game_is_on:
         # Check if player missed ball with paddle, lose a life
         if ball.ycor() <= -SCREEN_HEIGHT + ball.y_adj:
             game_is_on = scoreboard.lose_life()
-            logger.info("---LOST A LIFE---")
+            logger.info("- Lost a life")
             ball.recenter()
 
         # Check if ball will bounce off of paddle or walls
         elif paddle.hit_ball(ball):
-            logger.info("=== HIT PADDLE ===")
+            logger.info(f"Hit paddle - ball({ball.pos()}), paddle({paddle.pos()})")
             ball.bounce_paddle(paddle)
         elif ball.ycor() >= (SCREEN_HEIGHT - (TURTLE_HEIGHT / 2)):
-            logger.info("=== HIT TOP WALL === ")
+            logger.info("Hit top wall")
             ball.bounce_horizontal_wall()
         elif (ball.xcor() <= (-SCREEN_WIDTH + (TURTLE_HEIGHT / 2))) & (ball.x_adj < 0):
-            logger.info("=== HIT LEFT SIDE WALL ===")
+            logger.info("Hit left wall")
             ball.bounce_vertical_wall()
         elif (ball.xcor() >= (SCREEN_WIDTH - (TURTLE_HEIGHT / 2))) & (ball.x_adj > 1):
-            logger.info("=== HIT RIGHT SIDE WALL ===")
+            logger.info("Hit right wall ")
             ball.bounce_vertical_wall()
 
         # Check if hit a brick, order bricks by distance to ball
@@ -73,9 +74,9 @@ while game_is_on:
         ordered_bricks = sorted(brick_dists.items(), key=lambda x: x[1])
         for b, d in ordered_bricks:
             if d <= 37:
-                logger.info(f"CHECKING BRICK {b.id} [{b.color()[0]}] - DIST = {d}")
+                logger.info(f"Checking {b.id} [{b.color()[0]}] - dist = {d:.2f}")
                 if ball.bounce_brick(b):
-                    logger.info(f"=== HIT BRICK {b.id} [{b.color()[0]}] ===")
+                    logger.info(f"+ Hit brick {b.id} [{b.color()[0]}]")
                     first_hit = scoreboard.update_score(b.points)
                     # Update with method for bouncing off of brick depending on side hit
                     brick_manager.remove_brick(b)

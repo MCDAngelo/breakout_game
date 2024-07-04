@@ -1,6 +1,6 @@
 import logging
 import math
-from random import choice, randint
+from random import choice
 from turtle import Turtle
 
 import numpy as np
@@ -13,7 +13,7 @@ formatter = logging.Formatter("[%(asctime)s] - %(message)s")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class Ball(Turtle):
@@ -23,27 +23,24 @@ class Ball(Turtle):
         self.color("white")
         self.penup()
         self.goto(0, 0)
-        self.x_adj = choice([-13, 13])
-        self.y_adj = -13
+        self.x_adj = choice([-2.0, 2.0])
+        self.y_adj = -2.0
         self.move_speed = round(math.sqrt((self.x_adj) ** 2 + (self.y_adj) ** 2), 2)
 
     def move(self):
         new_x = self.xcor() + self.x_adj
         new_y = self.ycor() + self.y_adj
+        logger.debug(f"Ball moving from ({self.pos()}) to ({new_x:.2f}, {new_y:.2f})")
+        logger.debug(f"Adjustments of x: {self.x_adj:.2f}, y {self.y_adj:.2f}")
         self.goto(new_x, new_y)
 
-    def update_adj_coords_theta_approach(self, theta):
-        x = math.cos(theta)
-        y = math.sin(theta)
-        self.x_adj = round(x * self.move_speed, 2)
-        self.y_adj = round(y * self.move_speed, 2)
+    def get_normal_vector(self, theta):
+        theta = math.radians(theta)
+        x = round(math.cos(theta), 2)
+        y = round(math.sin(theta), 2)
+        return [x, y]
 
     def reflect_v(self, normal_v):
-        if abs(self.y_adj) < 5:
-            rand_adj = randint(70, 100) / 100
-            self.y_adj = (
-                self.y_adj + rand_adj if self.y_adj > 0 else self.y_adj - rand_adj
-            )
         current_v = np.array([self.x_adj, self.y_adj])
         normal_v = np.array(normal_v)
         reflected_v = current_v - 2 * (current_v @ normal_v) * normal_v
@@ -53,25 +50,29 @@ class Ball(Turtle):
     def bounce_paddle(self, paddle):
         # For more realistic bouncing, vary the angle of the bounce depending on
         # where the ball hits the paddle
-        # This article uses vector reflection for the bounces,
+        # The angle is interpolated based on where the ball hit the paddle,
+        # the left-most side uses a normal vector at (-0.196, 0.981) for the reflection
+        # the right-most side uses a normal vector at (0.196, 0.981), and the middle uses
+        # a normal vector (0,1), based on the normal vectors referenced in the article below
         # https://www.informit.com/articles/article.aspx?p=2180417&seqNum=2
-        if self.xcor() < (paddle.xcor() - (PADDLE_WIDTH / 6)):
-            norm_vector = [-0.196, 0.981]
-        elif self.xcor() < (paddle.xcor() + (PADDLE_WIDTH / 6)):
-            norm_vector = [0, 1]
+        if self.xcor() < (paddle.xcor() - (PADDLE_WIDTH / 2)):
+            d = -PADDLE_WIDTH
+        elif self.xcor() > (paddle.xcor() + (PADDLE_WIDTH / 2)):
+            d = 0
         else:
-            norm_vector = [0.196, 0.981]
+            d = self.xcor() - paddle.xcor() + (PADDLE_WIDTH / 2)
+        LEFT_MOST = round(math.degrees(math.acos(-0.196 / 1)), 1)
+        RIGHT_MOST = round(math.degrees(math.acos(0.196 / 1)), 1)
+        theta = ((d / PADDLE_WIDTH) * (LEFT_MOST - RIGHT_MOST)) + RIGHT_MOST
+        norm_vector = self.get_normal_vector(theta)
+        logger.info(f"Ball = ({self.pos()}), paddle = ({paddle.pos()})")
+        logger.info(
+            f"Hit {d:.2f} distance from edge of paddle - angle = {theta:.2f}, N = {norm_vector}"
+        )
         self.reflect_v(norm_vector)
 
-        # Realistic bouncing where the angle varies from 45-90 degree bounce
-        # depending on where the ball hits the paddle
-        # d = paddle.xcor() - (PADDLE_WIDTH / 2) - self.xcor()
-        # theta = ((d / PADDLE_WIDTH) - (1 / 2)) * (math.pi / 2)
-        # print(f"Hit {d} distance from edge of paddle")
-        # self.update_adj_coords_theta_approach(theta)
-
     def bounce_brick(self, brick):
-        logger.debug(f"ball:({self.pos()}), brick: ({brick.pos()})")
+        logger.info(f"ball:({self.pos()}), brick: ({brick.pos()})")
         BUFFER = 5
         yspan_for_brick = TURTLE_HEIGHT + BUFFER
         xspan_for_brick = (BRICK_WIDTH / 2) + (TURTLE_HEIGHT / 2) + BUFFER
@@ -84,8 +85,7 @@ class Ball(Turtle):
             )
             & (self.y_adj > 0)
         ):
-            print("hello")
-            logger.info("=== BOUNCED OFF OF BOTTOM ===")
+            logger.info("Bounced off of bottom of brick")
             self.bounce_horizontal_wall()
             return True
         elif (
@@ -97,7 +97,7 @@ class Ball(Turtle):
             )
             & (self.y_adj < 0)
         ):
-            logger.info("=== BOUNCED OFF OF TOP ===")
+            logger.info("Bounced off of top of brick")
             self.bounce_horizontal_wall()
             return True
         elif (
@@ -109,7 +109,7 @@ class Ball(Turtle):
             )
             & (self.x_adj < 0)
         ):
-            logger.info("=== BOUNCED OFF OF LEFT ===")
+            logger.info("Bounced off of left side of brick")
             self.bounce_vertical_wall()
             return True
         elif (
@@ -121,12 +121,15 @@ class Ball(Turtle):
             )
             & (self.x_adj > 0)
         ):
-            logger.info("=== BOUNCED OFF OF RIGHT ===")
+            logger.info("Bounced off of right side of brick")
             self.bounce_vertical_wall()
             return True
 
     def bounce_vertical_wall(self):
-        self.reflect_v([1, 0])
+        if self.y_adj == 0:
+            self.reflect_v(self.get_normal_vector(92))
+        else:
+            self.reflect_v([1, 0])
 
     def bounce_horizontal_wall(self):
         self.reflect_v([0, -1])
@@ -139,6 +142,10 @@ class Ball(Turtle):
 
     def speed_up(self):
         old_speed = self.move_speed
-        self.move_speed *= 1.2
+        self.move_speed = round(old_speed * 1.2, 2)
+        logger.info(f"Ball sped up from {old_speed:.2f} to {self.move_speed:.2f}")
         self.x_adj *= self.move_speed / old_speed
         self.y_adj *= self.move_speed / old_speed
+        logger.info(
+            f"Ball adjustments now set to x: {self.x_adj:.2f}, y: {self.y_adj:.2f}"
+        )

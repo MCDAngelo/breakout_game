@@ -53,15 +53,16 @@ class Scoreboard:
         self.num_hits += 1
         self.display.clear()
         self.display.write_score()
+        logger.info(f"Number of hits: {self.num_hits}, points: {self.display.score}")
         return self.check_first_hits(points)
 
     def check_first_hits(self, points):
         if (not self.has_hit_orange) and (points == 5):
-            logger.info("hit first orange")
+            logger.info("Ball hit first orange")
             self.has_hit_orange = True
             return True
         if (not self.has_hit_red) and (points == 7):
-            logger.info("hit first red")
+            logger.info("Ball hit first red")
             self.has_hit_red = True
             return True
 

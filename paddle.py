@@ -1,3 +1,4 @@
+import logging
 import turtle as t
 
 from constants import (
@@ -7,6 +8,14 @@ from constants import (
     STEP,
     TURTLE_HEIGHT,
 )
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("breakout_logger.log")
+formatter = logging.Formatter("[%(asctime)s] - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.setLevel(logging.DEBUG)
 
 
 class Paddle(t.Turtle):
@@ -32,13 +41,24 @@ class Paddle(t.Turtle):
         t.onkeypress(key="Right", fun=self.move_right)
 
     def hit_ball(self, ball):
-        max_y_dist_for_hit = TURTLE_HEIGHT + (abs(ball.y_adj) / 2)
+        max_y_dist_for_hit = TURTLE_HEIGHT + (TURTLE_HEIGHT / 2)
         max_x_dist_for_hit = (PADDLE_WIDTH / 2) + (TURTLE_HEIGHT / 2)
-        if ball.y_adj < 0:
-            if self.distance(ball) <= max_y_dist_for_hit:
+        logger.info(f"Checking paddle hit - ball ({ball.pos()}, paddle ({self.pos()}))")
+        logger.debug(f"max x = {max_x_dist_for_hit}, max y = {max_y_dist_for_hit}")
+        logger.debug(
+            f"x boundaries: {self.xcor() - max_x_dist_for_hit} {self.xcor() + max_x_dist_for_hit}"
+        )
+        logger.debug(f"y boundaries: {self.ycor() } {self.ycor() + max_y_dist_for_hit}")
+        if ball.y_adj < 0:  # To prevent bouncing up and down off of paddle
+            if (
+                (self.xcor() - max_x_dist_for_hit)
+                <= ball.xcor()
+                <= (self.xcor() + max_x_dist_for_hit)
+            ) & ((self.ycor()) <= ball.ycor() <= (self.ycor() + max_y_dist_for_hit)):
+                # if self.distance(ball) <= max_y_dist_for_hit:
                 return True
-            # Custom check for hits made by corner of paddle
-            if ((ball.ycor() - self.ycor()) < max_y_dist_for_hit) & (
-                abs(self.xcor() - ball.xcor()) < max_x_dist_for_hit
-            ):
-                return True
+            # # Custom check for hits made by corner of paddle
+            # if ((ball.ycor() - self.ycor()) < max_y_dist_for_hit) & (
+            #     abs(self.xcor() - ball.xcor()) < max_x_dist_for_hit
+            # ):
+            #     return True

@@ -42,12 +42,16 @@ class BrickManager:
             (SCREEN_HEIGHT - (i * (TURTLE_HEIGHT + 5)) - 110)
             for i in range(0, NUM_BRICK_ROWS)
         ]
-        logger.info(f"ROWS OF BRICK Y COORDS: \n{self.brick_y_coords}")
+        logger.info(
+            f"Setting up {NUM_BRICK_ROWS} rows of bricks at: \n{self.brick_y_coords}"
+        )
         self.brick_x_coords = [
             (i * (BRICK_WIDTH + 6) + 23)
             for i in range(-NUM_BRICK_COLS // 2, NUM_BRICK_COLS // 2)
         ]
-        logger.info(f"ROWS OF BRICK X COORDS: \n{self.brick_x_coords}")
+        logger.info(
+            f"Setting up {NUM_BRICK_COLS} columns of bricks at: \n{self.brick_x_coords}"
+        )
         self.brick_colors = [i for i in BRICK_SCORING.keys() for _ in range(0, 2)]
 
         self.bricks = [
