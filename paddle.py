@@ -1,13 +1,8 @@
 import logging
 import turtle as t
 
-from constants import (
-    PADDLE_WIDTH,
-    PADDLE_WIDTH_FACTOR,
-    SCREEN_WIDTH,
-    STEP,
-    TURTLE_HEIGHT,
-)
+from constants import (PADDLE_WIDTH, PADDLE_WIDTH_FACTOR, SCREEN_WIDTH, STEP,
+                       TURTLE_HEIGHT)
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler("breakout_logger.log")
@@ -15,7 +10,7 @@ formatter = logging.Formatter("[%(asctime)s] - %(message)s")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 class Paddle(t.Turtle):
@@ -41,7 +36,7 @@ class Paddle(t.Turtle):
         t.onkeypress(key="Right", fun=self.move_right)
 
     def hit_ball(self, ball):
-        max_y_dist_for_hit = TURTLE_HEIGHT + (TURTLE_HEIGHT / 2)
+        max_y_dist_for_hit = TURTLE_HEIGHT
         max_x_dist_for_hit = (PADDLE_WIDTH / 2) + (TURTLE_HEIGHT / 2)
         logger.info(f"Checking paddle hit - ball ({ball.pos()}, paddle ({self.pos()}))")
         logger.debug(f"max x = {max_x_dist_for_hit}, max y = {max_y_dist_for_hit}")
@@ -55,10 +50,4 @@ class Paddle(t.Turtle):
                 <= ball.xcor()
                 <= (self.xcor() + max_x_dist_for_hit)
             ) & ((self.ycor()) <= ball.ycor() <= (self.ycor() + max_y_dist_for_hit)):
-                # if self.distance(ball) <= max_y_dist_for_hit:
                 return True
-            # # Custom check for hits made by corner of paddle
-            # if ((ball.ycor() - self.ycor()) < max_y_dist_for_hit) & (
-            #     abs(self.xcor() - ball.xcor()) < max_x_dist_for_hit
-            # ):
-            #     return True

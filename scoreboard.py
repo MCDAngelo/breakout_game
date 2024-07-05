@@ -1,13 +1,8 @@
 import logging
 from turtle import Turtle
 
-from constants import (
-    DISPLAY_ALIGNMENT,
-    DISPLAY_FONT,
-    GAME_OVER_FONT,
-    SCORE_DISPLAY_FONT,
-    SCREEN_HEIGHT,
-)
+from constants import (DISPLAY_ALIGNMENT, DISPLAY_FONT, GAME_OVER_FONT,
+                       SCORE_DISPLAY_FONT, SCREEN_HEIGHT)
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler("breakout_logger.log")

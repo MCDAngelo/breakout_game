@@ -1,15 +1,9 @@
 import logging
 import turtle as t
 
-from constants import (
-    BRICK_SCORING,
-    BRICK_WIDTH,
-    BRICK_WIDTH_FACTOR,
-    NUM_BRICK_COLS,
-    NUM_BRICK_ROWS,
-    SCREEN_HEIGHT,
-    TURTLE_HEIGHT,
-)
+from constants import (BRICK_SCORING, BRICK_WIDTH, BRICK_WIDTH_FACTOR,
+                       NUM_BRICK_COLS, NUM_BRICK_ROWS, SCREEN_HEIGHT,
+                       TURTLE_HEIGHT)
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler("breakout_logger.log")

@@ -8,7 +8,6 @@ from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TURTLE_HEIGHT
 from paddle import Paddle
 from scoreboard import Scoreboard
 
-
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler("breakout_logger.log")
 formatter = logging.Formatter("[%(asctime)s] - %(message)s")
@@ -78,7 +77,6 @@ while game_is_on:
                 if ball.bounce_brick(b):
                     logger.info(f"+ Hit brick {b.id} [{b.color()[0]}]")
                     first_hit = scoreboard.update_score(b.points)
-                    # Update with method for bouncing off of brick depending on side hit
                     brick_manager.remove_brick(b)
                     if (scoreboard.num_hits in [4, 12]) or first_hit:
                         ball.speed_up()

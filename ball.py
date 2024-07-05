@@ -13,7 +13,7 @@ formatter = logging.Formatter("[%(asctime)s] - %(message)s")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 class Ball(Turtle):
